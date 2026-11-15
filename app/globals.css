@@ -1,0 +1,1017 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Themes. The game is a neon sign on a dark wall; Notebook and Cats & dogs
+   re-skin it by swapping these tokens (set via data-theme on <html>).
+   ========================================================================== */
+
+:root,
+:root[data-theme="neon"] {
+  color-scheme: dark;
+  --wall: #0d0a1e;
+  --wall-2: #1b0f3a;
+  --paper: none;
+  --paper-size: auto;
+  --ink: #f0ecff;
+  --ink-dim: #a39bcf;
+  --line: rgba(176, 160, 255, 0.2);
+  --line-strong: rgba(176, 160, 255, 0.42);
+  --panel: rgba(255, 255, 255, 0.04);
+  --chip: rgba(255, 255, 255, 0.11);
+  --focus: #ffffff;
+
+  --x: #ff3d8b;
+  --o: #35f0ff;
+  --draw: #ffc247;
+
+  --frame: #4b3f86;
+  --frame-glow: drop-shadow(0 0 3px rgba(130, 110, 220, 0.55));
+  --plate: rgba(20, 14, 48, 0.72);
+  --plate-line: rgba(176, 160, 255, 0.16);
+  --plate-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  --ambient-strength: 24%;
+
+  --font-title: var(--font-display);
+  --title-scale: 1;
+
+  --btn-bg: color-mix(in srgb, var(--x) 12%, transparent);
+  --btn-fg: #fff;
+  --btn-border: var(--x);
+  --btn-glow: 0 0 14px -2px var(--x), inset 0 0 14px -6px var(--x);
+}
+
+:root[data-theme="notebook"] {
+  color-scheme: light;
+  --wall: #f4f7fb;
+  --wall-2: #e9eff9;
+  --paper:
+    linear-gradient(rgba(54, 98, 200, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(54, 98, 200, 0.13) 1px, transparent 1px);
+  /* One size per gradient layer above. */
+  --paper-size: 28px 28px, 28px 28px;
+  --ink: #1b2745;
+  --ink-dim: #566283;
+  --line: rgba(27, 39, 69, 0.16);
+  --line-strong: rgba(27, 39, 69, 0.38);
+  --panel: rgba(255, 255, 255, 0.78);
+  --chip: #dbe6f8;
+  --focus: #1b2745;
+
+  --x: #d6303a;
+  --o: #1f56d4;
+  --draw: #a85f00;
+
+  --frame: #1b2745;
+  --frame-glow: none;
+  --plate: #ffffff;
+  --plate-line: rgba(27, 39, 69, 0.14);
+  --plate-shadow: 0 18px 40px -22px rgba(27, 39, 69, 0.35);
+  --ambient-strength: 0%;
+
+  --font-title: var(--font-hand);
+  --title-scale: 1.35;
+
+  --btn-bg: transparent;
+  --btn-fg: #fff;
+  --btn-border: var(--ink);
+  --btn-glow: none;
+}
+
+:root[data-theme="pets"] {
+  color-scheme: dark;
+  --wall: #1a1030;
+  --wall-2: #2d1748;
+  --ink: #fff4e6;
+  --ink-dim: #cdb8ea;
+  --line: rgba(255, 214, 170, 0.2);
+  --line-strong: rgba(255, 214, 170, 0.42);
+  --panel: rgba(255, 255, 255, 0.05);
+  --chip: rgba(255, 255, 255, 0.12);
+
+  --x: #ffb454;
+  --o: #7be0a8;
+  --draw: #ffd36e;
+
+  --frame: #7a5ab0;
+  --frame-glow: drop-shadow(0 0 3px rgba(170, 130, 240, 0.5));
+  --plate: rgba(34, 18, 60, 0.72);
+  --plate-line: rgba(255, 214, 170, 0.16);
+
+  --btn-bg: color-mix(in srgb, var(--x) 14%, transparent);
+  --btn-border: var(--x);
+  --btn-glow: 0 0 14px -2px var(--x), inset 0 0 14px -6px var(--x);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@property --ambient {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #6b4bff;
+}
+
+html {
+  background: var(--wall);
+}
+
+body {
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  background-color: var(--wall);
+  background-image: var(--paper), linear-gradient(180deg, var(--wall), var(--wall-2));
+  background-size: var(--paper-size), auto;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* ==========================================================================
+   Page layout
+   ========================================================================== */
+
+.stage {
+  --ambient: var(--ink-dim);
+  position: relative;
+  min-height: 100dvh;
+  transition: --ambient 0.7s ease;
+}
+.stage[data-tone="X"] {
+  --ambient: var(--x);
+}
+.stage[data-tone="O"] {
+  --ambient: var(--o);
+}
+.stage[data-tone="draw"] {
+  --ambient: var(--draw);
+}
+
+/* The wall glows in the colour of whoever is up next. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    55% 45% at 50% 42%,
+    color-mix(in srgb, var(--ambient) var(--ambient-strength), transparent),
+    transparent 72%
+  );
+}
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1060px);
+  margin-inline: auto;
+  padding: clamp(14px, 3vw, 36px) 16px 56px;
+  display: grid;
+  gap: 18px 56px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "head"
+    "score"
+    "play"
+    "settings";
+}
+
+.masthead {
+  grid-area: head;
+  text-align: center;
+}
+.area-score {
+  grid-area: score;
+}
+.play {
+  grid-area: play;
+}
+.area-settings {
+  grid-area: settings;
+}
+
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "head head"
+      "play score"
+      "play settings";
+    align-items: start;
+  }
+  .masthead {
+    margin-bottom: 8px;
+  }
+}
+
+/* Neon text glow. Written out here (not in a root token) because it has to
+   read each element's own --tube colour. */
+.title-letter,
+.status-text,
+.score-value {
+  text-shadow:
+    0 0 6px color-mix(in srgb, var(--tube) 90%, transparent),
+    0 0 22px var(--tube),
+    0 0 48px color-mix(in srgb, var(--tube) 55%, transparent);
+}
+:root[data-theme="notebook"] .title-letter,
+:root[data-theme="notebook"] .status-text,
+:root[data-theme="notebook"] .score-value {
+  text-shadow: none;
+}
+
+/* ==========================================================================
+   Title: letters ignite one after another, like a sign being switched on
+   ========================================================================== */
+
+.title {
+  font-family: var(--font-title), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: calc(clamp(2.6rem, 9vw, 4.6rem) * var(--title-scale));
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+
+.title-word {
+  --tube: var(--x);
+}
+.title-word[data-tone="O"] {
+  --tube: var(--o);
+}
+
+.title-letter {
+  display: inline-block;
+  color: color-mix(in srgb, var(--tube) 72%, white);
+  animation: ignite 1.4s both;
+  animation-delay: calc(var(--n) * 110ms + 200ms);
+}
+:root[data-theme="notebook"] .title-letter {
+  color: var(--tube);
+}
+
+@keyframes ignite {
+  0% {
+    opacity: 0.06;
+  }
+  7% {
+    opacity: 1;
+  }
+  11% {
+    opacity: 0.08;
+  }
+  19% {
+    opacity: 0.9;
+  }
+  23% {
+    opacity: 0.12;
+  }
+  31% {
+    opacity: 1;
+  }
+  36% {
+    opacity: 0.6;
+  }
+  44%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.tagline {
+  margin-top: 6px;
+  color: var(--ink-dim);
+  font-size: 1rem;
+}
+
+/* ==========================================================================
+   Status line
+   ========================================================================== */
+
+.status {
+  --tube: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 64px;
+  /* The board's backing plate pokes out 4% above the board (about 19px at
+     full size), so leave room for that plus some breathing space. */
+  margin-bottom: 30px;
+}
+.status[data-tone="X"] {
+  --tube: var(--x);
+}
+.status[data-tone="O"] {
+  --tube: var(--o);
+}
+.status[data-tone="draw"] {
+  --tube: var(--draw);
+}
+
+.status-mark {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+
+.status-text {
+  font-family: var(--font-title), system-ui, sans-serif;
+  font-size: calc(clamp(1.7rem, 5.4vw, 2.5rem) * var(--title-scale));
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--tube) 72%, white);
+  animation: swap 0.28s ease-out;
+}
+:root[data-theme="notebook"] .status-text {
+  color: var(--tube);
+}
+
+.status-text[data-thinking]::after {
+  content: "...";
+  display: inline-block;
+  width: 1.1em;
+  overflow: hidden;
+  vertical-align: bottom;
+  text-align: left;
+  animation: dots 1.1s steps(4, end) infinite;
+}
+
+@keyframes swap {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes dots {
+  from {
+    width: 0;
+  }
+  to {
+    width: 1.1em;
+  }
+}
+
+/* ==========================================================================
+   Board
+   ========================================================================== */
+
+.board {
+  position: relative;
+  width: min(100%, 480px);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+
+/* The sign's backing plate. */
+.board::before {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  border-radius: 28px;
+  background: var(--plate);
+  border: 1px solid var(--plate-line);
+  box-shadow: var(--plate-shadow);
+}
+
+.board-grid,
+.win-line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Unlit tubes. */
+.board-grid path {
+  fill: none;
+  stroke: var(--frame);
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: var(--frame-glow);
+}
+:root[data-theme="notebook"] .board-grid path {
+  stroke-width: 3.5;
+}
+.board[data-over="draw"] .board-grid path {
+  stroke: var(--draw);
+  animation: flicker 0.9s linear both;
+}
+
+.board-cells {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.cell {
+  position: relative;
+  background: none;
+  border: 0;
+  border-radius: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.5s 0.3s;
+}
+.cell[aria-disabled="true"] {
+  cursor: default;
+}
+.cell:focus-visible {
+  outline-offset: -8px;
+}
+.cell[data-dim] {
+  opacity: 0.35;
+}
+.cell[data-win] {
+  animation: pulse 1.3s ease-in-out 0.9s infinite;
+}
+/* Brightening works on glowing tubes but bleaches ink on white paper. */
+:root[data-theme="notebook"] .cell[data-win] {
+  animation: none;
+}
+
+.cell > .mark,
+.cell > .ghost {
+  position: absolute;
+  inset: 14%;
+  width: 72%;
+  height: 72%;
+}
+
+/* A faint preview of the mark you're about to place. */
+.ghost {
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.cell:hover .ghost,
+.cell:focus-visible .ghost {
+  opacity: 0.28;
+}
+.ghost .mark {
+  width: 100%;
+  height: 100%;
+  filter: none;
+}
+
+@keyframes pulse {
+  50% {
+    filter: brightness(1.45) saturate(1.15);
+  }
+}
+
+/* ==========================================================================
+   Marks: neon tubes, marker pen, or emoji
+   ========================================================================== */
+
+.mark {
+  --tube: var(--x);
+  --core: color-mix(in srgb, var(--tube) 22%, white);
+  display: block;
+  overflow: visible;
+}
+.mark[data-kind="O"],
+.win-line[data-kind="O"] {
+  --tube: var(--o);
+}
+.win-line[data-kind="X"] {
+  --tube: var(--x);
+}
+.win-line {
+  --core: color-mix(in srgb, var(--tube) 22%, white);
+}
+
+.mark .tube,
+.mark .core,
+.win-line .tube,
+.win-line .core {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mark .tube {
+  stroke: var(--tube);
+  stroke-width: 8;
+}
+.mark .core {
+  stroke: var(--core);
+  stroke-width: 3;
+}
+.win-line .tube {
+  stroke: var(--tube);
+  stroke-width: 8;
+}
+.win-line .core {
+  stroke: var(--core);
+  stroke-width: 3;
+}
+
+.mark[data-theme-skin="neon"],
+.win-line[data-theme-skin="neon"],
+.mark[data-theme-skin="pets"] {
+  filter: drop-shadow(0 0 3px var(--tube)) drop-shadow(0 0 13px var(--tube));
+}
+.win-line[data-theme-skin="neon"] {
+  filter: drop-shadow(0 0 4px var(--tube)) drop-shadow(0 0 20px var(--tube));
+}
+.mark[data-theme-skin="pets"] {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--tube) 55%, transparent));
+}
+
+/* Notebook: a marker pen, no glow. */
+.mark[data-theme-skin="notebook"] .tube {
+  stroke-width: 7;
+}
+.win-line[data-theme-skin="notebook"] .tube {
+  stroke-width: 6;
+  stroke-dasharray: none;
+}
+
+/* Placing a mark: the tube is drawn from one end to the other. A dash of 1
+   against a path length of 1 means the whole stroke can be revealed. */
+.mark[data-animate] .tube,
+.mark[data-animate] .core,
+.win-line .tube,
+.win-line .core {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.02;
+  animation: draw 0.36s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 150ms);
+}
+.win-line .tube,
+.win-line .core {
+  animation-duration: 0.55s;
+  animation-delay: 0.25s;
+}
+
+/* ...while the whole tube stutters on like gas catching. */
+.mark[data-animate][data-theme-skin="neon"] {
+  animation: flicker 0.6s linear both;
+}
+
+.mark[data-animate][data-theme-skin="pets"] .mark-emoji {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop 0.42s cubic-bezier(0.3, 1.7, 0.5, 1) both;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes flicker {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.95;
+  }
+  18% {
+    opacity: 0.12;
+  }
+  28% {
+    opacity: 0.85;
+  }
+  36% {
+    opacity: 0.3;
+  }
+  52%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  from {
+    transform: scale(0.2) rotate(-14deg);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   Buttons and controls
+   ========================================================================== */
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.btn {
+  min-height: 50px;
+  padding: 0 26px;
+  border-radius: 14px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    transform 0.12s,
+    box-shadow 0.2s,
+    background-color 0.2s;
+}
+.btn:hover:not(:disabled) {
+  background: var(--chip);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  min-width: 150px;
+  background: var(--btn-bg);
+  color: var(--ink);
+  border: 2px solid var(--btn-border);
+  box-shadow: var(--btn-glow);
+}
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--btn-border) 24%, transparent);
+}
+:root[data-theme="notebook"] .btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+:root[data-theme="notebook"] .btn-primary:hover:not(:disabled) {
+  background: #2b3a67;
+}
+
+.hint {
+  max-width: 38ch;
+  margin: 18px auto 0;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+/* ==========================================================================
+   Scoreboard
+   ========================================================================== */
+
+.section-title {
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.scores {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.score {
+  --tube: var(--ink);
+  display: grid;
+  grid-template-rows: 28px auto auto;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s;
+}
+.score[data-mark="X"] {
+  --tube: var(--x);
+}
+.score[data-mark="O"] {
+  --tube: var(--o);
+}
+.score[data-mark="draw"] {
+  --tube: var(--draw);
+  grid-template-rows: 28px auto auto;
+  min-width: 78px;
+}
+.score[data-mark="X"],
+.score[data-mark="O"] {
+  background: var(--panel);
+  border-color: var(--line);
+}
+.score[data-active] {
+  border-color: color-mix(in srgb, var(--tube) 75%, transparent);
+  box-shadow: 0 0 20px -6px var(--tube);
+}
+
+.score-icon {
+  width: 28px;
+  height: 28px;
+}
+.score-icon .mark {
+  width: 100%;
+  height: 100%;
+  filter: none;
+}
+
+.score-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  grid-row: 3;
+}
+.score[data-mark="draw"] .score-name {
+  grid-row: 3;
+}
+
+.score-value {
+  grid-row: 2;
+  font-family: var(--font-title), system-ui, sans-serif;
+  font-size: calc(2.2rem * var(--title-scale));
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--tube) 70%, white);
+  animation: bump 0.4s cubic-bezier(0.3, 1.8, 0.5, 1);
+}
+:root[data-theme="notebook"] .score-value {
+  color: var(--tube);
+}
+.score[data-mark="draw"]::before {
+  content: "";
+  grid-row: 1;
+}
+
+@keyframes bump {
+  from {
+    transform: scale(1.5);
+    opacity: 0.4;
+  }
+}
+
+.link-button {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-button:hover:not(:disabled) {
+  color: var(--ink);
+}
+.link-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  text-decoration: none;
+}
+.link-button[data-confirm] {
+  color: var(--draw);
+}
+
+/* ==========================================================================
+   Setup panel
+   ========================================================================== */
+
+.settings {
+  display: grid;
+  gap: 18px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.settings .section-title {
+  margin-bottom: 0;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.field-label {
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+}
+
+.segmented {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.segment {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+.segment input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.segment span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  color: var(--ink-dim);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.segment:hover input:not(:checked) + span {
+  color: var(--ink);
+}
+.segment input:checked + span {
+  background: var(--chip);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+.segment input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.names {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.name-field input {
+  min-height: 44px;
+  width: 100%;
+  padding: 0 12px;
+  border-radius: 11px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+}
+.name-field input::placeholder {
+  color: var(--ink-dim);
+  opacity: 0.8;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.switch-track {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ink-dim);
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
+}
+.switch[aria-checked="true"] .switch-track {
+  background: color-mix(in srgb, var(--o) 28%, transparent);
+  border-color: var(--o);
+}
+.switch[aria-checked="true"] .switch-thumb {
+  transform: translateX(20px);
+  background: var(--o);
+}
+
+/* ==========================================================================
+   Small screens and motion preferences
+   ========================================================================== */
+
+/* Single column: the scores sit right above the board, so drop their
+   visible heading (screen readers still get it) to keep New Game on screen. */
+@media (max-width: 899px) {
+  .scoreboard .section-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Phones: everything has to fit above the fold, with New Game in reach.
+   Budget is a 667px-tall screen, the shortest common one. */
+@media (max-width: 480px) {
+  :root[data-theme="notebook"] {
+    --title-scale: 1.15; /* handwriting is tall; keep it from eating the screen */
+  }
+  .layout {
+    gap: 10px;
+    padding-top: 10px;
+  }
+  .title {
+    line-height: 1;
+  }
+  .board {
+    width: calc(100% - 16px);
+  }
+  .tagline {
+    display: none;
+  }
+  .status {
+    min-height: 44px;
+    margin-bottom: 20px; /* the plate overhang is smaller on a phone */
+  }
+  .actions {
+    margin-top: 22px;
+  }
+  .btn-primary {
+    flex: 1;
+  }
+  .score,
+  .score[data-mark="draw"] {
+    grid-template-rows: 24px auto auto;
+    padding: 6px;
+  }
+  .score-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+  }
+  .status-text[data-thinking]::after {
+    width: 1.1em;
+  }
+}
