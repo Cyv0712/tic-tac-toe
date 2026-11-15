@@ -51,5 +51,5 @@ Decisions worth knowing about:
   new game). Cells have labels like "Row 1, column 2, empty" and the status line
   is announced by screen readers. `prefers-reduced-motion` turns off the
   flicker, draw-in animations and confetti.
-- **Sound is off until you turn it on**, and every sound is a reaction to
-  something you just did.
+- **Sound is on by default** and can be switched off in Setup. Every sound is a
+  reaction to something you just did, so browsers allow it without a prompt.

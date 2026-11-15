@@ -13,7 +13,7 @@ export type Settings = {
   difficulty: Difficulty;
   /** Which mark the person plays when facing the computer. */
   humanMark: Mark;
-  /** Sound effects and vibration. Off until the player turns it on. */
+  /** Sound effects and vibration. Every sound answers something the player just did. */
   sound: boolean;
   names: Record<Mark, string>;
   /** Scores are kept per mode so solo games don't mix into two-player ones. */
@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   mode: "pvp",
   difficulty: "hard",
   humanMark: "X",
-  sound: false,
+  sound: true,
   names: { X: "", O: "" },
   scores: { pvp: NO_SCORES, ai: NO_SCORES },
 };
@@ -65,7 +65,8 @@ function sanitize(raw: unknown): Settings {
       ? (r.difficulty as Difficulty)
       : DEFAULT_SETTINGS.difficulty,
     humanMark: r.humanMark === "O" ? "O" : "X",
-    sound: r.sound === true,
+    sound:
+      typeof r.sound === "boolean" ? r.sound : DEFAULT_SETTINGS.sound,
     names: { X: name(names.X), O: name(names.O) },
     scores: { pvp: tally(scores.pvp), ai: tally(scores.ai) },
   };
